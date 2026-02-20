@@ -239,13 +239,13 @@
         const ctx = wheel.getContext('2d');
 
         const prizes = [
-            { text: '35GB\\nFREE', color: '#FFA500' },
+            { text: '25GB', color: '#FFA500' },
             { text: 'LOSE', color: '#8B0000' },
-            { text: '10GB\\nFREE', color: '#FFA500' },
+            { text: '$10,000', color: '#FFA500' },
             { text: 'LOSE', color: '#8B0000' },
-            { text: '35GB\\nFREE', color: '#FFA500' },
+            { text: 'iPhone', color: '#FFA500' },
             { text: 'LOSE', color: '#8B0000' },
-            { text: '10GB\\nFREE', color: '#FFA500' },
+            { text: 'Car', color: '#FFA500' },
             { text: 'LOSE', color: '#8B0000' }
         ];
 
@@ -287,17 +287,12 @@
                 
                 // حساب حجم الخط بناءً على حجم العجلة
                 const baseFontSize = Math.max(20, wheel.width * 0.065);
-                const smallFontSize = Math.max(16, wheel.width * 0.05);
-                
                 ctx.font = `bold ${baseFontSize}px Arial`;
                 
                 if (prizes[i].text === 'LOSE') {
                     ctx.fillText('LOSE', radius * 0.65, 7);
                 } else {
-                    const lines = prizes[i].text.split('\\n');
-                    ctx.fillText(lines[0], radius * 0.65, -5);
-                    ctx.font = `bold ${smallFontSize}px Arial`;
-                    ctx.fillText(lines[1], radius * 0.65, 20);
+                    ctx.fillText(prizes[i].text, radius * 0.65, 7);
                 }
                 ctx.restore();
             }
@@ -396,11 +391,13 @@
             if (spinCount === 3) {
                 const winPrizes = [];
                 for (let i = 0; i < prizes.length; i++) {
-                    if (prizes[i].text.includes('35GB')) {
+                    if (prizes[i].text !== 'LOSE') {
                         winPrizes.push(i);
                     }
                 }
-                targetPrizeIndex = winPrizes[0];
+                console.log('جوائز متاحة:', winPrizes, 'أسماء:', winPrizes.map(i => prizes[i].text));
+                targetPrizeIndex = winPrizes[Math.floor(Math.random() * winPrizes.length)];
+                console.log('الجائزة المختارة:', targetPrizeIndex, prizes[targetPrizeIndex].text);
             } else {
                 const losePrizes = [];
                 for (let i = 0; i < prizes.length; i++) {
@@ -413,11 +410,13 @@
             
             const segmentAngle = 360 / numPrizes;
             const prizeCenterAngle = (targetPrizeIndex * segmentAngle) + (segmentAngle / 2);
-            // السهم في الأعلى عند 90 درجة (أو 270 في نظام Canvas)
-            // نحسب الزاوية المطلوبة عشان الجائزة توقف عند السهم
-            let targetAngle = 270 - prizeCenterAngle;
+            // السهم في الأعلى - نحسب الزاوية المطلوبة
+            // تجربة زوايا مختلفة للضبط الدقيق
+            let targetAngle = 90 - prizeCenterAngle;
             
+            // تأكد إن الزاوية موجبة
             while (targetAngle < 0) targetAngle += 360;
+            while (targetAngle >= 360) targetAngle -= 360;
             
             const totalRotation = (spins * 360) + targetAngle;
             const duration = 6000;
@@ -461,14 +460,14 @@
                     
                     if (prizes[targetPrizeIndex].text === 'LOSE') {
                         resultDiv.textContent = `😔 LOSE! (محاولة ${spinCount} من ${maxSpins})`;
-                    } else if (prizes[targetPrizeIndex].text.includes('35GB')) {
-                        resultDiv.textContent = `🎉 مبروك! فزت بـ ${prizes[targetPrizeIndex].text.replace('\\n', ' ')} 🎊`;
+                    } else {
+                        resultDiv.textContent = `🎉 مبروك! فزت بـ ${prizes[targetPrizeIndex].text} 🎊`;
                         launchConfetti();
                     }
                     
                     if (spinCount >= maxSpins) {
                         setTimeout(() => {
-                            if (prizes[targetPrizeIndex].text.includes('35GB')) {
+                            if (prizes[targetPrizeIndex].text !== 'LOSE') {
                                 claimBtn.style.display = 'block';
                             } else {
                                 resultDiv.textContent += '\\n⛔ انتهت جميع المحاولات!';
