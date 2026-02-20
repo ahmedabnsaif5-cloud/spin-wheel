@@ -224,7 +224,7 @@
             <h1 class="title">عجلة الحظ</h1>
             <div class="arrow"></div>
             <div class="wheel-container">
-                <canvas id="wheel" width="300" height="300"></canvas>
+                <canvas id="wheel" width="350" height="350"></canvas>
             </div>
         </div>
         
@@ -692,12 +692,12 @@
         });
 
         claimBtn.addEventListener('click', () => {
-            window.location.href = 'https://www.google.com/';
+            window.open('https://www.google.com/', '_blank');
         });
 
         // Make canvas responsive
         function resizeCanvas() {
-            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 60, 300) : 400;
+            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 40, 350) : 450;
             wheel.width = maxSize;
             wheel.height = maxSize;
             drawWheel(winningPrizeIndex);
