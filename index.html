@@ -155,67 +155,18 @@
         .confetti {
             position: fixed;
             width: 10px;
-            height: 10px;
-            top: -10px;
+            height: 15px;
             z-index: 9999;
-            animation: confetti-fall linear forwards;
-            opacity: 1;
-            background: radial-gradient(circle at 30% 30%, #FFFF99, #FFD700 50%, #B8860B);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 
-                        inset 0 0 10px rgba(255, 255, 255, 0.5),
-                        0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: confetti-burst 2.5s ease-out forwards;
         }
 
-        @keyframes confetti-fall {
-            to {
-                top: 100vh;
-                transform: translateX(calc(var(--random-x, 0) * 100px)) rotateZ(calc(var(--random-r, 0) * 720deg));
-                opacity: 0;
-            }
-        }
-
-        .firework {
-            position: fixed;
-            width: 4px;
-            height: 40px;
-            background: linear-gradient(to top, #FFD700, #FF6600, #FF0000);
-            bottom: -50px;
-            z-index: 1;
-            animation: firework-launch 1.5s ease-out forwards;
-            box-shadow: 0 0 10px #FFD700;
-        }
-
-        @keyframes firework-launch {
+        @keyframes confetti-burst {
             0% {
-                bottom: -50px;
-                opacity: 1;
-            }
-            70% {
-                bottom: 20%;
+                transform: translate(0, 0) rotate(0deg);
                 opacity: 1;
             }
             100% {
-                bottom: 25%;
-                opacity: 0;
-            }
-        }
-
-        .firework-burst {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            z-index: 1;
-            animation: burst-particle 1s ease-out forwards;
-        }
-
-        @keyframes burst-particle {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty)) scale(0);
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rotate));
                 opacity: 0;
             }
         }
@@ -537,162 +488,42 @@
             animate();
         }
 
-        function launchFireworks() {
-            const fireworksCount = 8;
-            const allElements = [];
-            
-            for (let i = 0; i < fireworksCount; i++) {
-                setTimeout(() => {
-                    const firework = document.createElement('div');
-                    firework.className = 'firework';
-                    firework.style.left = (10 + Math.random() * 80) + '%';
-                    document.body.appendChild(firework);
-                    allElements.push(firework);
-                    
-                    // انفجار الصاروخ بعد 1 ثانية
-                    setTimeout(() => {
-                        createBurst(firework.style.left, '25%');
-                        firework.remove();
-                    }, 1000);
-                }, i * 300);
-            }
-            
-            function createBurst(left, top) {
-                const particles = 30;
-                const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00FF00', '#00CED1'];
-                
-                for (let i = 0; i < particles; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'firework-burst';
-                    particle.style.left = left;
-                    particle.style.top = top;
-                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    
-                    const angle = (i / particles) * Math.PI * 2;
-                    const distance = 100 + Math.random() * 100;
-                    const tx = Math.cos(angle) * distance;
-                    const ty = Math.sin(angle) * distance;
-                    
-                    particle.style.setProperty('--tx', tx + 'px');
-                    particle.style.setProperty('--ty', ty + 'px');
-                    
-                    document.body.appendChild(particle);
-                    allElements.push(particle);
-                    
-                    setTimeout(() => particle.remove(), 1000);
-                }
-            }
-            
-            setTimeout(() => {
-                allElements.forEach(el => {
-                    if (el.parentNode) el.remove();
-                });
-            }, 5000);
-        }
-
         function launchConfetti() {
             playWinSound();
             
-            // إطلاق الصواريخ
-            launchFireworks();
+            // الحصول على موقع العجلة
+            const wheelRect = wheel.getBoundingClientRect();
+            const wheelCenterX = wheelRect.left + wheelRect.width / 2;
+            const wheelCenterY = wheelRect.top + wheelRect.height / 2;
             
-            const confettiCount = 250;
-            const confettiElements = [];
+            const confettiCount = 100;
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#FF1493'];
             
             for (let i = 0; i < confettiCount; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                 
-                // حجم متنوع للكوينز
-                const size = Math.random() * 20 + 16;
-                confetti.style.width = size + 'px';
-                confetti.style.height = size + 'px';
+                // بداية الترتر من مركز العجلة
+                confetti.style.left = wheelCenterX + 'px';
+                confetti.style.top = wheelCenterY + 'px';
                 
-                // دائري دائماً (كوينز)
-                confetti.style.borderRadius = '50%';
+                // حركة عشوائية في كل الاتجاهات
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 200;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                const rotate = Math.random() * 720 - 360;
                 
-                // تأثير لمعان ذهبي قوي جداً
-                const lightPos = 20 + Math.random() * 30;
-                confetti.style.background = `radial-gradient(circle at ${lightPos}% ${lightPos}%, #FFFACD, #FFD700 40%, #DAA520 70%, #B8860B)`;
-                confetti.style.boxShadow = '0 0 25px rgba(255, 215, 0, 1), inset 0 0 20px rgba(255, 255, 255, 0.7), 0 8px 15px rgba(0, 0, 0, 0.5), inset -2px -2px 10px rgba(184, 134, 11, 0.8)';
-                
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.animationDelay = Math.random() * 0.8 + 's';
-                confetti.style.animationDuration = (Math.random() * 2.5 + 4) + 's';
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+                confetti.style.setProperty('--rotate', rotate + 'deg');
                 
                 document.body.appendChild(confetti);
-                confettiElements.push(confetti);
+                
+                // إزالة الترتر بعد 2.5 ثانية
+                setTimeout(() => confetti.remove(), 2500);
             }
-            
-            setTimeout(() => {
-                for (let i = 0; i < 200; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    
-                    const size = Math.random() * 22 + 14;
-                    confetti.style.width = size + 'px';
-                    confetti.style.height = size + 'px';
-                    confetti.style.borderRadius = '50%';
-                    const lightPos = 20 + Math.random() * 30;
-                    confetti.style.background = `radial-gradient(circle at ${lightPos}% ${lightPos}%, #FFFACD, #FFD700 40%, #DAA520 70%, #B8860B)`;
-                    confetti.style.boxShadow = '0 0 25px rgba(255, 215, 0, 1), inset 0 0 20px rgba(255, 255, 255, 0.7), 0 8px 15px rgba(0, 0, 0, 0.5), inset -2px -2px 10px rgba(184, 134, 11, 0.8)';
-                    
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
-                    confetti.style.animationDuration = (Math.random() * 2.5 + 3.5) + 's';
-                    
-                    document.body.appendChild(confetti);
-                    confettiElements.push(confetti);
-                }
-            }, 600);
-            
-            setTimeout(() => {
-                for (let i = 0; i < 180; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    
-                    const size = Math.random() * 18 + 14;
-                    confetti.style.width = size + 'px';
-                    confetti.style.height = size + 'px';
-                    confetti.style.borderRadius = '50%';
-                    const lightPos = 20 + Math.random() * 30;
-                    confetti.style.background = `radial-gradient(circle at ${lightPos}% ${lightPos}%, #FFFACD, #FFD700 40%, #DAA520 70%, #B8860B)`;
-                    confetti.style.boxShadow = '0 0 25px rgba(255, 215, 0, 1), inset 0 0 20px rgba(255, 255, 255, 0.7), 0 8px 15px rgba(0, 0, 0, 0.5), inset -2px -2px 10px rgba(184, 134, 11, 0.8)';
-                    
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.animationDelay = Math.random() * 0.4 + 's';
-                    confetti.style.animationDuration = (Math.random() * 2.5 + 3) + 's';
-                    
-                    document.body.appendChild(confetti);
-                    confettiElements.push(confetti);
-                }
-            }, 1200);
-            
-            setTimeout(() => {
-                for (let i = 0; i < 150; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    
-                    const size = Math.random() * 20 + 12;
-                    confetti.style.width = size + 'px';
-                    confetti.style.height = size + 'px';
-                    confetti.style.borderRadius = '50%';
-                    const lightPos = 20 + Math.random() * 30;
-                    confetti.style.background = `radial-gradient(circle at ${lightPos}% ${lightPos}%, #FFFACD, #FFD700 40%, #DAA520 70%, #B8860B)`;
-                    confetti.style.boxShadow = '0 0 25px rgba(255, 215, 0, 1), inset 0 0 20px rgba(255, 255, 255, 0.7), 0 8px 15px rgba(0, 0, 0, 0.5), inset -2px -2px 10px rgba(184, 134, 11, 0.8)';
-                    
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.animationDelay = Math.random() * 0.3 + 's';
-                    confetti.style.animationDuration = (Math.random() * 2 + 2.8) + 's';
-                    
-                    document.body.appendChild(confetti);
-                    confettiElements.push(confetti);
-                }
-            }, 1800);
-            
-            setTimeout(() => {
-                confettiElements.forEach(el => el.remove());
-            }, 12000);
         }
 
         function playSpinSound() {
