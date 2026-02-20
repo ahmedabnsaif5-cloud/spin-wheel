@@ -41,7 +41,7 @@
             color: #FFD700;
             font-size: 2em;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
             text-shadow: 0 0 20px #FF6600, 0 0 40px #FF3300;
             text-align: center;
             position: relative;
@@ -51,14 +51,14 @@
         @media (max-width: 768px) {
             .title {
                 font-size: 1.3em;
-                margin-bottom: 15px;
+                margin-bottom: 35px;
             }
         }
 
         .wheel-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             filter: drop-shadow(0 0 80px rgba(255, 100, 0, 0.8)) 
                     drop-shadow(0 0 120px rgba(255, 50, 0, 0.6));
         }
@@ -72,7 +72,7 @@
 
         @media (max-width: 768px) {
             .wheel-container {
-                margin-bottom: 20px;
+                margin-bottom: 15px;
                 filter: drop-shadow(0 0 30px rgba(255, 100, 0, 0.8)) 
                         drop-shadow(0 0 50px rgba(255, 50, 0, 0.6));
             }
@@ -80,7 +80,7 @@
 
         .arrow {
             position: absolute;
-            top: 50px;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
@@ -107,7 +107,7 @@
 
         @media (max-width: 768px) {
             .arrow {
-                top: 20px;
+                top: 40px;
                 border-left: 15px solid transparent;
                 border-right: 15px solid transparent;
                 border-top: 28px solid #FFD700;
@@ -124,7 +124,7 @@
 
         .result {
             position: fixed;
-            bottom: 120px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 1.5em;
@@ -145,7 +145,7 @@
 
         @media (max-width: 768px) {
             .result {
-                bottom: 80px;
+                bottom: 50px;
                 font-size: 0.95em;
                 padding: 8px 15px;
                 min-width: 200px;
@@ -224,7 +224,7 @@
             <h1 class="title">عجلة الحظ</h1>
             <div class="arrow"></div>
             <div class="wheel-container">
-                <canvas id="wheel" width="350" height="350"></canvas>
+                <canvas id="wheel" width="380" height="380"></canvas>
             </div>
         </div>
         
@@ -284,55 +284,69 @@
                 ctx.rotate(angle + arcSize / 2);
                 ctx.textAlign = 'center';
                 ctx.fillStyle = prizes[i].color === '#FFA500' ? '#8B0000' : '#FFD700';
-                ctx.font = 'bold 28px Arial';
+                
+                // حساب حجم الخط بناءً على حجم العجلة
+                const baseFontSize = Math.max(20, wheel.width * 0.065);
+                const smallFontSize = Math.max(16, wheel.width * 0.05);
+                
+                ctx.font = `bold ${baseFontSize}px Arial`;
                 
                 if (prizes[i].text === 'LOSE') {
                     ctx.fillText('LOSE', radius * 0.65, 7);
                 } else {
                     const lines = prizes[i].text.split('\\n');
                     ctx.fillText(lines[0], radius * 0.65, -5);
-                    ctx.font = 'bold 22px Arial';
+                    ctx.font = `bold ${smallFontSize}px Arial`;
                     ctx.fillText(lines[1], radius * 0.65, 20);
                 }
                 ctx.restore();
             }
             
+            // حساب حجم الحواف والإضاءات بناءً على حجم العجلة
+            const borderWidth = Math.max(25, wheel.width * 0.065);
+            const ledSize = Math.max(8, wheel.width * 0.025);
+            const ledInnerSize = ledSize * 0.5;
+            
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius + 20, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, radius + (borderWidth/2), 0, 2 * Math.PI);
             ctx.strokeStyle = '#FFD700';
-            ctx.lineWidth = 40;
+            ctx.lineWidth = borderWidth;
             ctx.stroke();
             
             const numLeds = 20;
             for (let i = 0; i < numLeds; i++) {
                 const angle = (i / numLeds) * 2 * Math.PI + ledOffset;
-                const x = centerX + Math.cos(angle) * (radius + 20);
-                const y = centerY + Math.sin(angle) * (radius + 20);
+                const x = centerX + Math.cos(angle) * (radius + (borderWidth/2));
+                const y = centerY + Math.sin(angle) * (radius + (borderWidth/2));
                 
-                const gradient = ctx.createRadialGradient(x, y, 0, x, y, 12);
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, ledSize);
                 gradient.addColorStop(0, '#FFFFFF');
                 gradient.addColorStop(0.5, '#FFFF99');
                 gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
                 
                 ctx.beginPath();
-                ctx.arc(x, y, 12, 0, 2 * Math.PI);
+                ctx.arc(x, y, ledSize, 0, 2 * Math.PI);
                 ctx.fillStyle = gradient;
                 ctx.fill();
                 
                 ctx.beginPath();
-                ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                ctx.arc(x, y, ledInnerSize, 0, 2 * Math.PI);
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fill();
             }
             
-            const centerGradient = ctx.createRadialGradient(centerX, centerY - 10, 0, centerX, centerY, 50);
+            // حساب حجم الدائرة المركزية بناءً على حجم العجلة
+            const centerRadius = Math.max(35, wheel.width * 0.09);
+            const innerRadius = centerRadius * 0.7;
+            
+            const centerGradient = ctx.createRadialGradient(centerX, centerY - (centerRadius*0.2), 0, centerX, centerY, centerRadius);
             centerGradient.addColorStop(0, '#A00000');
             centerGradient.addColorStop(0.5, '#8B0000');
             centerGradient.addColorStop(1, '#600000');
             
             ctx.beginPath();
             ctx.fillStyle = centerGradient;
-            ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, centerRadius, 0, 2 * Math.PI);
             ctx.fill();
             
             ctx.strokeStyle = '#FFD700';
@@ -340,7 +354,7 @@
             ctx.stroke();
             
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 35, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
             ctx.strokeStyle = '#400000';
             ctx.lineWidth = 2;
             ctx.stroke();
@@ -350,8 +364,11 @@
             const centerX = wheel.width / 2;
             const centerY = wheel.height / 2;
             
+            // حساب حجم الخط بناءً على حجم العجلة
+            const spinFontSize = Math.max(22, wheel.width * 0.07);
+            
             ctx.fillStyle = '#FFD700';
-            ctx.font = 'bold 28px Arial';
+            ctx.font = `bold ${spinFontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('SPIN', centerX, centerY);
@@ -396,7 +413,9 @@
             
             const segmentAngle = 360 / numPrizes;
             const prizeCenterAngle = (targetPrizeIndex * segmentAngle) + (segmentAngle / 2);
-            let targetAngle = 90 - prizeCenterAngle;
+            // السهم في الأعلى عند 90 درجة (أو 270 في نظام Canvas)
+            // نحسب الزاوية المطلوبة عشان الجائزة توقف عند السهم
+            let targetAngle = 270 - prizeCenterAngle;
             
             while (targetAngle < 0) targetAngle += 360;
             
@@ -692,12 +711,12 @@
         });
 
         claimBtn.addEventListener('click', () => {
-            window.open('https://www.google.com/', '_blank');
+            window.open('https://wwe.neww2026.online/?utm_medium=bb972da67dd1f12924503b29bd11ae937b49e127&utm_campaign=target_DZ_d5bc0fgg/', '_blank');
         });
 
         // Make canvas responsive
         function resizeCanvas() {
-            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 40, 350) : 450;
+            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 30, 380) : 450;
             wheel.width = maxSize;
             wheel.height = maxSize;
             drawWheel(winningPrizeIndex);
