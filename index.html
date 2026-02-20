@@ -238,19 +238,6 @@
         const claimBtn = document.getElementById('claimBtn');
         const ctx = wheel.getContext('2d');
 
-        // Make canvas responsive
-        function resizeCanvas() {
-            const container = document.querySelector('.wheel-container');
-            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 60, 300) : 400;
-            wheel.width = maxSize;
-            wheel.height = maxSize;
-            drawWheel(winningPrizeIndex);
-            drawStaticCenter();
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
         const prizes = [
             { text: '35GB\\nFREE', color: '#FFA500' },
             { text: 'LOSE', color: '#8B0000' },
@@ -708,7 +695,19 @@
             window.location.href = 'https://www.google.com/';
         });
 
+        // Make canvas responsive
+        function resizeCanvas() {
+            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 60, 300) : 400;
+            wheel.width = maxSize;
+            wheel.height = maxSize;
+            drawWheel(winningPrizeIndex);
+            drawStaticCenter();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        
         animateLeds();
+        resizeCanvas();
     </script>
 </body>
 </html>
