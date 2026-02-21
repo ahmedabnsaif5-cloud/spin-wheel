@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin and Win</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at center, #4A0066 0%, #1A0033 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px;
+            }
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .title {
+            color: #FF00FF;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 50px;
+            text-shadow: 0 0 20px #FF00FF, 0 0 40px #CC00FF, 0 0 60px #9900FF;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.6em;
+                margin-bottom: 35px;
+            }
+        }
+
+        .wheel-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 80px rgba(255, 0, 255, 0.8)) 
+                    drop-shadow(0 0 120px rgba(204, 0, 255, 0.6));
+        }
+
+        #wheel {
+            border-radius: 50%;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .wheel-container {
+                margin-bottom: 15px;
+                filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.8)) 
+                        drop-shadow(0 0 50px rgba(204, 0, 255, 0.6));
+            }
+        }
+
+        .arrow {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .arrow {
+                display: none;
+            }
+        }
+
+        .result {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            color: #000000;
+            font-weight: bold;
+            min-height: 40px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 25px;
+            border-radius: 15px;
+            border: 2px solid #FF00FF;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            text-align: center;
+            min-width: 300px;
+            max-width: 90%;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 768px) {
+            .result {
+                bottom: 90px;
+                font-size: 0.95em;
+                padding: 8px 15px;
+                min-width: 200px;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 15px;
+            z-index: 9999;
+            animation: confetti-burst 2.5s ease-out forwards;
+        }
+
+        @keyframes confetti-burst {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(var(--rotate));
+                opacity: 0;
+            }
+        }
+
+        .claim-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%);
+            color: #000000;
+            border: 3px solid #000000;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0,0,0,0.4);
+            text-transform: uppercase;
+            animation: pulse 1.5s infinite;
+            z-index: 10000;
+            max-width: 90%;
+        }
+
+        .claim-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.7), 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .claim-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .claim-button {
+                bottom: 10px;
+                padding: 10px 25px;
+                font-size: 0.85em;
+                border: 2px solid #000000;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0,0,0,0.4);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.7), 0 8px 20px rgba(0,0,0,0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wheel-wrapper">
+            <h1 class="title">SPIN AND WIN</h1>
+            <div class="arrow"></div>
+            <div class="wheel-container">
+                <canvas id="wheel" width="420" height="420"></canvas>
+            </div>
+        </div>
+        
+        <div id="result" class="result"></div>
+        <button id="claimBtn" class="claim-button" style="display: none;">Claim Prize 🎁</button>
+    </div>
+    
+    <script>
+        const wheel = document.getElementById('wheel');
+        const resultDiv = document.getElementById('result');
+        const claimBtn = document.getElementById('claimBtn');
+        const ctx = wheel.getContext('2d');
+
+        const prizes = [
+            { text: '25GB', color: '#6600CC' },
+            { text: 'LOSE', color: '#FF00FF' },
+            { text: '$10,000', color: '#6600CC' },
+            { text: 'LOSE', color: '#FF00FF' },
+            { text: 'iPhone', color: '#6600CC' },
+            { text: 'LOSE', color: '#FF00FF' },
+            { text: 'Car', color: '#6600CC' },
+            { text: 'LOSE', color: '#FF00FF' }
+        ];
+
+        const numPrizes = prizes.length;
+        const arcSize = (2 * Math.PI) / numPrizes;
+        let currentRotation = 0;
+        let isSpinning = false;
+        let ledOffset = 0;
+        let winningPrizeIndex = null;
+        let spinCount = 0;
+        const maxSpins = 3;
+
+        function drawWheel(winningIndex = null) {
+            const centerX = wheel.width / 2;
+            const centerY = wheel.height / 2;
+            const radius = wheel.width / 2 - 40;
+            
+            ctx.clearRect(0, 0, wheel.width, wheel.height);
+            
+            for (let i = 0; i < numPrizes; i++) {
+                const angle = i * arcSize;
+                
+                ctx.beginPath();
+                ctx.fillStyle = prizes[i].color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = 'center';
+                
+                const baseFontSize = Math.max(20, wheel.width * 0.065);
+                ctx.font = `bold ${baseFontSize}px Arial`;
+                
+                if (prizes[i].text === 'LOSE') {
+                    ctx.fillStyle = '#6600CC';
+                } else {
+                    ctx.fillStyle = '#FFD700';
+                }
+                
+                ctx.fillText(prizes[i].text === 'LOSE' ? 'LOSE' : prizes[i].text, radius * 0.65, 7);
+                ctx.restore();
+            }
+            
+            const borderWidth = Math.max(18, wheel.width * 0.045);
+            const ledSize = Math.max(6, wheel.width * 0.02);
+            const ledInnerSize = ledSize * 0.5;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + (borderWidth/2), 0, 2 * Math.PI);
+            ctx.strokeStyle = '#FF00FF';
+            ctx.lineWidth = borderWidth;
+            ctx.stroke();
+            
+            const numLeds = 20;
+            for (let i = 0; i < numLeds; i++) {
+                const angle = (i / numLeds) * 2 * Math.PI + ledOffset;
+                const x = centerX + Math.cos(angle) * (radius + (borderWidth/2));
+                const y = centerY + Math.sin(angle) * (radius + (borderWidth/2));
+                
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, ledSize);
+                gradient.addColorStop(0, '#FFFFFF');
+                gradient.addColorStop(0.3, '#FF99FF');
+                gradient.addColorStop(1, 'rgba(255, 0, 255, 0.3)');
+                
+                ctx.beginPath();
+                ctx.arc(x, y, ledSize, 0, 2 * Math.PI);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(x, y, ledInnerSize, 0, 2 * Math.PI);
+                ctx.fillStyle = '#FF99FF';
+                ctx.fill();
+            }
+            
+            const centerRadius = Math.max(35, wheel.width * 0.09);
+            const innerRadius = centerRadius * 0.7;
+            
+            const centerGradient = ctx.createRadialGradient(centerX, centerY - (centerRadius*0.2), 0, centerX, centerY, centerRadius);
+            centerGradient.addColorStop(0, '#9900CC');
+            centerGradient.addColorStop(0.5, '#6600CC');
+            centerGradient.addColorStop(1, '#330066');
+            
+            ctx.beginPath();
+            ctx.fillStyle = centerGradient;
+            ctx.arc(centerX, centerY, centerRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#FF00FF';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#330066';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // رسم سهم على الدائرة المركزية يشير للأعلى
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // رسم السهم أكبر وأطول وأبعد عن الدائرة
+            ctx.beginPath();
+            ctx.moveTo(0, -centerRadius - 65);
+            ctx.lineTo(-15, -centerRadius - 10);
+            ctx.lineTo(15, -centerRadius - 10);
+            ctx.closePath();
+            ctx.fillStyle = '#FFFF00';
+            ctx.fill();
+            
+            // حدود سوداء للسهم
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // إضافة توهج للسهم
+            ctx.shadowColor = '#FFFF00';
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        function drawStaticCenter() {
+            // لا نرسم أي نص في المنتصف - السهم فقط
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            if (spinCount >= maxSpins) {
+                resultDiv.textContent = '⛔ No more attempts!';
+                return;
+            }
+            
+            isSpinning = true;
+            resultDiv.textContent = '';
+            winningPrizeIndex = null;
+            
+            spinCount++;
+            
+            const spinSound = playSpinSound();
+            
+            const spins = 5 + Math.random() * 5;
+            let targetPrizeIndex;
+            
+            if (spinCount === 3) {
+                const winPrizes = [];
+                for (let i = 0; i < prizes.length; i++) {
+                    if (prizes[i].text !== 'LOSE') {
+                        winPrizes.push(i);
+                    }
+                }
+                targetPrizeIndex = winPrizes[Math.floor(Math.random() * winPrizes.length)];
+            } else {
+                const losePrizes = [];
+                for (let i = 0; i < prizes.length; i++) {
+                    if (prizes[i].text === 'LOSE') {
+                        losePrizes.push(i);
+                    }
+                }
+                targetPrizeIndex = losePrizes[Math.floor(Math.random() * losePrizes.length)];
+            }
+            
+            const segmentAngle = 360 / numPrizes;
+            const prizeCenterAngle = (targetPrizeIndex * segmentAngle) + (segmentAngle / 2);
+            // السهم هيدور عكس عقارب الساعة للوصول للجائزة
+            let targetAngle = prizeCenterAngle;
+            
+            const totalRotation = (spins * 360) + targetAngle;
+            const duration = 6000;
+            const startTime = Date.now();
+            const startRotation = currentRotation;
+            
+            function animate() {
+                const now = Date.now();
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                currentRotation = startRotation + totalRotation * easeOut;
+                
+                // رسم العجلة ثابتة بدون الدائرة المركزية
+                const centerX = wheel.width / 2;
+                const centerY = wheel.height / 2;
+                const radius = wheel.width / 2 - 40;
+                
+                ctx.clearRect(0, 0, wheel.width, wheel.height);
+                
+                // رسم الخانات
+                for (let i = 0; i < numPrizes; i++) {
+                    const angle = i * arcSize;
+                    
+                    ctx.beginPath();
+                    ctx.fillStyle = prizes[i].color;
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, angle, angle + arcSize);
+                    ctx.lineTo(centerX, centerY);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    ctx.save();
+                    ctx.translate(centerX, centerY);
+                    ctx.rotate(angle + arcSize / 2);
+                    ctx.textAlign = 'center';
+                    
+                    const baseFontSize = Math.max(20, wheel.width * 0.065);
+                    ctx.font = `bold ${baseFontSize}px Arial`;
+                    
+                    if (prizes[i].text === 'LOSE') {
+                        ctx.fillStyle = '#6600CC';
+                    } else {
+                        ctx.fillStyle = '#FFD700';
+                    }
+                    
+                    ctx.fillText(prizes[i].text === 'LOSE' ? 'LOSE' : prizes[i].text, radius * 0.65, 7);
+                    ctx.restore();
+                }
+                
+                // رسم الحواف والإضاءات
+                const borderWidth = Math.max(18, wheel.width * 0.045);
+                const ledSize = Math.max(6, wheel.width * 0.02);
+                const ledInnerSize = ledSize * 0.5;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius + (borderWidth/2), 0, 2 * Math.PI);
+                ctx.strokeStyle = '#FF00FF';
+                ctx.lineWidth = borderWidth;
+                ctx.stroke();
+                
+                const numLeds = 20;
+                for (let i = 0; i < numLeds; i++) {
+                    const angle = (i / numLeds) * 2 * Math.PI + ledOffset;
+                    const x = centerX + Math.cos(angle) * (radius + (borderWidth/2));
+                    const y = centerY + Math.sin(angle) * (radius + (borderWidth/2));
+                    
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, ledSize);
+                    gradient.addColorStop(0, '#FFFFFF');
+                    gradient.addColorStop(0.3, '#FF99FF');
+                    gradient.addColorStop(1, 'rgba(255, 0, 255, 0.3)');
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, ledSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, ledInnerSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#FF99FF';
+                    ctx.fill();
+                }
+                
+                // رسم الدائرة المركزية الدوارة
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate((currentRotation * Math.PI) / 180);
+                
+                const centerRadius = Math.max(35, wheel.width * 0.09);
+                const innerRadius = centerRadius * 0.7;
+                
+                const centerGradient = ctx.createRadialGradient(0, -(centerRadius*0.2), 0, 0, 0, centerRadius);
+                centerGradient.addColorStop(0, '#9900CC');
+                centerGradient.addColorStop(0.5, '#6600CC');
+                centerGradient.addColorStop(1, '#330066');
+                
+                ctx.beginPath();
+                ctx.fillStyle = centerGradient;
+                ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#FF00FF';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, innerRadius, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#330066';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // رسم السهم
+                ctx.beginPath();
+                ctx.moveTo(0, -centerRadius - 65);
+                ctx.lineTo(-15, -centerRadius - 10);
+                ctx.lineTo(15, -centerRadius - 10);
+                ctx.closePath();
+                ctx.fillStyle = '#FFFF00';
+                ctx.fill();
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // إضافة توهج للسهم
+                ctx.shadowColor = '#FFFF00';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                
+                ctx.restore();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    if (spinSound) {
+                        spinSound.stop();
+                    }
+                    
+                    winningPrizeIndex = targetPrizeIndex;
+                    
+                    // رسم العجلة النهائية
+                    drawWheel(targetPrizeIndex);
+                    drawStaticCenter();
+                    
+                    if (prizes[targetPrizeIndex].text === 'LOSE') {
+                        resultDiv.textContent = `😔 LOSE! (Attempt ${spinCount} of ${maxSpins})`;
+                        playLoseSound();
+                    } else {
+                        resultDiv.textContent = `🎉 Congratulations! You won ${prizes[targetPrizeIndex].text} 🎊`;
+                        launchConfetti();
+                    }
+                    
+                    if (spinCount >= maxSpins) {
+                        setTimeout(() => {
+                            if (prizes[targetPrizeIndex].text !== 'LOSE') {
+                                claimBtn.style.display = 'block';
+                            } else {
+                                resultDiv.textContent += '\\n⛔ All attempts finished!';
+                            }
+                        }, 1000);
+                    }
+                    
+                    isSpinning = false;
+                }
+            }
+            
+            animate();
+        }
+
+        function launchConfetti() {
+            playWinSound();
+            
+            const wheelRect = wheel.getBoundingClientRect();
+            const wheelCenterX = wheelRect.left + wheelRect.width / 2;
+            const wheelCenterY = wheelRect.top + wheelRect.height / 2;
+            
+            const confettiCount = 100;
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#FF1493'];
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                confetti.style.left = wheelCenterX + 'px';
+                confetti.style.top = wheelCenterY + 'px';
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 200;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                const rotate = Math.random() * 720 - 360;
+                
+                confetti.style.setProperty('--tx', tx + 'px');
+                confetti.style.setProperty('--ty', ty + 'px');
+                confetti.style.setProperty('--rotate', rotate + 'deg');
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 2500);
+            }
+        }
+
+        function playSpinSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                let tickInterval;
+                let tickDelay = 50;
+                const maxDelay = 500;
+                const duration = 6000;
+                const startTime = Date.now();
+                
+                function playTick() {
+                    const tickOsc = audioContext.createOscillator();
+                    const tickGain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    
+                    tickOsc.connect(filter);
+                    filter.connect(tickGain);
+                    tickGain.connect(audioContext.destination);
+                    
+                    tickOsc.type = 'sine';
+                    tickOsc.frequency.value = 800;
+                    
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 800;
+                    filter.Q.value = 10;
+                    
+                    const tickTime = audioContext.currentTime;
+                    tickGain.gain.setValueAtTime(0.3, tickTime);
+                    tickGain.gain.exponentialRampToValueAtTime(0.01, tickTime + 0.08);
+                    
+                    tickOsc.start(tickTime);
+                    tickOsc.stop(tickTime + 0.08);
+                }
+                
+                function scheduleTick() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    tickDelay = 50 + (maxDelay - 50) * easeOut;
+                    
+                    if (progress < 1) {
+                        playTick();
+                        tickInterval = setTimeout(scheduleTick, tickDelay);
+                    }
+                }
+                
+                scheduleTick();
+                
+                return {
+                    stop: () => {
+                        if (tickInterval) {
+                            clearTimeout(tickInterval);
+                        }
+                    }
+                };
+            } catch (e) {
+                return { stop: () => {} };
+            }
+        }
+
+        function playWinSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const melodyFrequencies = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1046.50, 783.99, 659.25];
+                
+                melodyFrequencies.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    const startTime = audioContext.currentTime + (index * 0.12);
+                    gainNode.gain.setValueAtTime(0.3, startTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                    
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + 0.4);
+                });
+                
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        const clap = audioContext.createBufferSource();
+                        const clapBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+                        const clapData = clapBuffer.getChannelData(0);
+                        
+                        for (let j = 0; j < clapData.length; j++) {
+                            clapData[j] = (Math.random() * 2 - 1) * Math.exp(-j / (clapData.length * 0.3));
+                        }
+                        
+                        clap.buffer = clapBuffer;
+                        
+                        const clapGain = audioContext.createGain();
+                        const clapFilter = audioContext.createBiquadFilter();
+                        
+                        clapFilter.type = 'bandpass';
+                        clapFilter.frequency.value = 1500;
+                        clapFilter.Q.value = 1;
+                        
+                        clap.connect(clapFilter);
+                        clapFilter.connect(clapGain);
+                        clapGain.connect(audioContext.destination);
+                        
+                        clapGain.gain.value = 0.4;
+                        
+                        clap.start(audioContext.currentTime);
+                    }, i * 150);
+                }
+                
+                setTimeout(() => {
+                    const drumOsc = audioContext.createOscillator();
+                    const drumGain = audioContext.createGain();
+                    
+                    drumOsc.connect(drumGain);
+                    drumGain.connect(audioContext.destination);
+                    
+                    drumOsc.frequency.value = 80;
+                    drumOsc.type = 'triangle';
+                    
+                    const drumTime = audioContext.currentTime;
+                    drumGain.gain.setValueAtTime(0.5, drumTime);
+                    drumGain.gain.exponentialRampToValueAtTime(0.01, drumTime + 0.3);
+                    
+                    drumOsc.start(drumTime);
+                    drumOsc.stop(drumTime + 0.3);
+                }, 400);
+            } catch (e) {
+                console.log('Win sound failed:', e);
+            }
+        }
+
+        function playLoseSound() {
+            const audio = new Audio('https://cdn.pixabay.com/audio/2023/10/30/audio_24e6eb6e00.mp3');
+            audio.volume = 0.6;
+            audio.play().catch(e => {
+                playGeneratedLoseSound();
+            });
+        }
+
+        function playGeneratedLoseSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const frequencies = [400, 350, 300, 250, 200];
+                
+                frequencies.forEach((freq, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    const startTime = audioContext.currentTime + (index * 0.15);
+                    gainNode.gain.setValueAtTime(0.2, startTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+                    
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + 0.3);
+                });
+            } catch (e) {
+                console.log('Generated sound failed:', e);
+            }
+        }
+
+        function animateLeds() {
+            ledOffset += 0.015;
+            
+            if (!isSpinning) {
+                drawWheel(winningPrizeIndex);
+                drawStaticCenter();
+            }
+            
+            requestAnimationFrame(animateLeds);
+        }
+
+        wheel.addEventListener('click', (e) => {
+            const rect = wheel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = wheel.width / 2;
+            const centerY = wheel.height / 2;
+            
+            const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+            
+            if (distance <= 50) {
+                spinWheel();
+            }
+        });
+
+        wheel.addEventListener('mousemove', (e) => {
+            const rect = wheel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = wheel.width / 2;
+            const centerY = wheel.height / 2;
+            
+            const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+            
+            if (distance <= 50) {
+                wheel.style.cursor = 'pointer';
+            } else {
+                wheel.style.cursor = 'default';
+            }
+        });
+
+        claimBtn.addEventListener('click', () => {
+            window.open('https://wwe.neww2026.online/?utm_medium=bb972da67dd1f12924503b29bd11ae937b49e127&utm_campaign=target_DZ_d5bc0fgg/', '_blank');
+        });
+
+        function resizeCanvas() {
+            const maxSize = window.innerWidth < 768 ? Math.min(window.innerWidth - 30, 420) : 480;
+            wheel.width = maxSize;
+            wheel.height = maxSize;
+            drawWheel(winningPrizeIndex);
+            drawStaticCenter();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        
+        animateLeds();
+        resizeCanvas();
+    </script>
+</body>
+</html>
