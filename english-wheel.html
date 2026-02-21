@@ -18,12 +18,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            padding: 20px 0;
         }
 
         .container {
             text-align: center;
             padding: 10px;
+            max-width: 600px;
+            width: 100%;
         }
 
         @media (max-width: 768px) {
@@ -86,6 +89,71 @@
             .arrow {
                 display: none;
             }
+        }
+
+        .prizes-section {
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+        }
+
+        .prizes-title {
+            color: #6600CC;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .winner-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #F8F8F8;
+            border-radius: 15px;
+            border: 2px solid #FF00FF;
+            transition: transform 0.3s;
+        }
+
+        .winner-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .winner-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #FF00FF;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #FF00FF, #6600CC);
+        }
+
+        .winner-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .winner-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 5px;
+        }
+
+        .winner-prize {
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .winner-time {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 3px;
         }
 
         .result {
@@ -192,6 +260,46 @@
             <div class="arrow"></div>
             <div class="wheel-container">
                 <canvas id="wheel" width="420" height="420"></canvas>
+            </div>
+        </div>
+        
+        <div class="prizes-section">
+            <h2 class="prizes-title">🎉 Recent Winners</h2>
+            
+            <div class="winner-item">
+                <img src="https://i.pravatar.cc/150?img=12" alt="John Smith" class="winner-avatar">
+                <div class="winner-info">
+                    <div class="winner-name">John Smith</div>
+                    <div class="winner-prize" style="color: #FF0000; font-weight: bold; border: 2px solid #000; padding: 5px 10px; border-radius: 8px; display: inline-block; background: rgba(255,0,0,0.1);">Won iPhone 17 Pro Max 📱</div>
+                    <div class="winner-time">2 hours ago</div>
+                </div>
+            </div>
+            
+            <div class="winner-item">
+                <img src="https://i.pravatar.cc/150?img=5" alt="Sarah Johnson" class="winner-avatar">
+                <div class="winner-info">
+                    <div class="winner-name">Sarah Johnson</div>
+                    <div class="winner-prize" style="color: #00AA00; font-weight: bold; border: 2px solid #000; padding: 5px 10px; border-radius: 8px; display: inline-block; background: rgba(0,170,0,0.1);">Won $10,000 Cash 💰</div>
+                    <div class="winner-time">5 hours ago</div>
+                </div>
+            </div>
+            
+            <div class="winner-item">
+                <img src="https://i.pravatar.cc/150?img=33" alt="Michael Brown" class="winner-avatar">
+                <div class="winner-info">
+                    <div class="winner-name">Michael Brown</div>
+                    <div class="winner-prize" style="color: #0066CC; font-weight: bold; border: 2px solid #000; padding: 5px 10px; border-radius: 8px; display: inline-block; background: rgba(0,102,204,0.1);">Won Car 2026 🚗</div>
+                    <div class="winner-time">1 day ago</div>
+                </div>
+            </div>
+            
+            <div class="winner-item">
+                <img src="https://i.pravatar.cc/150?img=9" alt="Emma Davis" class="winner-avatar">
+                <div class="winner-info">
+                    <div class="winner-name">Emma Davis</div>
+                    <div class="winner-prize" style="color: #FF6600; font-weight: bold; border: 2px solid #000; padding: 5px 10px; border-radius: 8px; display: inline-block; background: rgba(255,102,0,0.1);">Won 25GB Internet 📶</div>
+                    <div class="winner-time">2 days ago</div>
+                </div>
             </div>
         </div>
         
